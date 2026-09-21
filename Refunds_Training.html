@@ -529,6 +529,48 @@ function devUnlockAll(){
   alert('Dev mode: all modules + the exam are now unlocked for review.');
 }
 
+/* ─── DEV MODE (Shift+D × 3 to toggle) ─── */
+(function(){
+  let _dSeq = 0, _dTimer = null;
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'D' && e.shiftKey){
+      clearTimeout(_dTimer);
+      _dSeq++;
+      _dTimer = setTimeout(() => _dSeq = 0, 1200);
+      if(_dSeq >= 3){ _dSeq = 0; toggleDevMode(); }
+    }
+  });
+  function toggleDevMode(){
+    const active = localStorage.getItem('kl-rf-devmode') === '1';
+    if(!active){
+      MODULES.forEach(m=>setResult(m.id,100,true));
+      setResult('exam',100,true);
+      localStorage.setItem('kl-rf-devmode','1');
+      showDevBadge(true);
+      renderHome();
+      alert('🔓 Dev mode ON — all modules unlocked');
+    } else {
+      localStorage.removeItem('kl-rf-devmode');
+      localStorage.removeItem(PROG_KEY);
+      showDevBadge(false);
+      renderHome();
+      alert('🔒 Dev mode OFF — progress cleared');
+    }
+  }
+  function showDevBadge(on){
+    let b = document.getElementById('dev-badge');
+    if(!b){
+      b = document.createElement('div');
+      b.id = 'dev-badge';
+      b.style.cssText = 'position:fixed;bottom:12px;right:12px;background:var(--coral);color:#fff;font-family:Baloo 2,sans-serif;font-weight:900;font-size:12px;padding:4px 10px;border-radius:20px;z-index:9999;pointer-events:none;letter-spacing:.5px';
+      b.textContent = '🔓 DEV MODE';
+      document.body.appendChild(b);
+    }
+    b.style.display = on ? 'block' : 'none';
+  }
+  if(localStorage.getItem('kl-rf-devmode') === '1'){ showDevBadge(true); }
+})();
+
 function renderHome(){
   const grid=document.getElementById('mgrid');
   let doneCount=0;
